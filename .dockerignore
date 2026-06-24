@@ -1,0 +1,10 @@
+backend/node_modules
+backend/.env
+backend/.env.example
+**/*.sql
+docker-compose.yml
+**/Dockerfile
+.git
+README.md
+API_DOCUMENTATION.md
+START_HERE_MYANMAR.md

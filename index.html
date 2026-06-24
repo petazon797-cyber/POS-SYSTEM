@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golden Mart POS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ============== LOGIN VIEW ============== -->
+  <section id="loginView" class="login-screen">
+    <div class="login-card">
+      <div class="brand-mark">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 11h20l-2 15H9L7 11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M12 11V8a5 5 0 0 1 10 0v3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </div>
+      <h1>Golden Mart POS</h1>
+      <p class="login-sub">Sign in to open your register</p>
+
+      <form id="loginForm">
+        <label>Username
+          <input type="text" id="loginUsername" autocomplete="username" required>
+        </label>
+        <label>Password
+          <input type="password" id="loginPassword" autocomplete="current-password" required>
+        </label>
+        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+      </form>
+      <p id="loginError" class="error-text" hidden></p>
+
+      <div class="demo-accounts">
+        <span>Demo accounts</span>
+        <code>admin / admin123</code>
+        <code>manager / manager123</code>
+        <code>cashier / cashier123</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== APP SHELL ============== -->
+  <div id="appShell" class="app-shell" hidden>
+
+    <aside class="sidebar">
+      <div class="brand-mark sidebar-brand">
+        <svg width="26" height="26" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 11h20l-2 15H9L7 11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M12 11V8a5 5 0 0 1 10 0v3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Golden Mart</span>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-tab="checkout">Checkout</button>
+        <button class="nav-item" data-tab="inventory">Inventory</button>
+        <button class="nav-item" data-tab="suppliers" data-role="manager,admin">Suppliers</button>
+        <button class="nav-item" data-tab="reports" data-role="manager,admin">Reports</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <span id="userName">--</span>
+          <span id="userRole" class="role-badge">--</span>
+        </div>
+        <button id="logoutBtn" class="btn btn-ghost btn-block">Log out</button>
+      </div>
+    </aside>
+
+    <main class="content">
+
+      <!-- ---------- CHECKOUT TAB ---------- -->
+      <section id="tab-checkout" class="tab-panel active">
+        <header class="panel-header">
+          <h2>Checkout</h2>
+          <p class="muted">Scan a barcode, or search and tap a product to add it to the sale.</p>
+        </header>
+
+        <div class="checkout-grid">
+          <div class="checkout-left">
+            <div class="scan-bar">
+              <input type="text" id="barcodeInput" placeholder="Scan barcode or type SKU, then press Enter" autofocus>
+            </div>
+            <input type="text" id="productSearch" class="search-input" placeholder="Or search by product name…">
+            <div id="productGrid" class="product-grid"></div>
+          </div>
+
+          <div class="checkout-right">
+            <div class="receipt">
+              <div class="receipt-header">
+                <strong>Current Sale</strong>
+                <span id="receiptTime" class="muted small"></span>
+              </div>
+              <div id="cartLines" class="receipt-lines">
+                <p class="empty-cart muted">Cart is empty — add a product to begin.</p>
+              </div>
+
+              <div class="receipt-perforation"></div>
+
+              <div class="promo-row">
+                <input type="text" id="promoCode" placeholder="Coupon code (optional)">
+              </div>
+
+              <div class="receipt-totals">
+                <div class="total-row"><span>Subtotal</span><span id="totalSubtotal">0</span></div>
+                <div class="total-row total-row-main"><span>Total</span><span id="totalAmount">0</span></div>
+              </div>
+
+              <div class="payment-section">
+                <strong class="small-label">Payment method</strong>
+                <div class="payment-methods">
+                  <button class="pay-method active" data-method="cash">Cash</button>
+                  <button class="pay-method" data-method="kpay">KPay</button>
+                  <button class="pay-method" data-method="wavepay">WavePay</button>
+                  <button class="pay-method" data-method="card">Card</button>
+                </div>
+                <label class="small-label">Amount received
+                  <input type="number" id="amountReceived" step="1" min="0">
+                </label>
+                <div id="changeRow" class="total-row change-row" hidden><span>Change</span><span id="changeAmount">0</span></div>
+              </div>
+
+              <button id="completeSaleBtn" class="btn btn-primary btn-block btn-large">Complete sale</button>
+              <button id="clearCartBtn" class="btn btn-text btn-block">Clear cart</button>
+              <p id="checkoutError" class="error-text" hidden></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- INVENTORY TAB ---------- -->
+      <section id="tab-inventory" class="tab-panel">
+        <header class="panel-header">
+          <h2>Inventory</h2>
+          <p class="muted">Stock levels, low-stock and expiry alerts.</p>
+        </header>
+
+        <div id="alertStrip" class="alert-strip"></div>
+
+        <div class="toolbar">
+          <input type="text" id="inventorySearch" class="search-input" placeholder="Search products…">
+          <button id="addProductBtn" class="btn btn-primary" data-role="manager,admin">+ Add product</button>
+        </div>
+
+        <div id="addProductForm" class="inline-form" hidden>
+          <input type="text" id="newSku" placeholder="SKU">
+          <input type="text" id="newBarcode" placeholder="Barcode">
+          <input type="text" id="newName" placeholder="Product name">
+          <input type="number" id="newCost" placeholder="Cost price" step="0.01">
+          <input type="number" id="newPrice" placeholder="Selling price" step="0.01">
+          <input type="number" id="newStock" placeholder="Initial stock">
+          <input type="number" id="newReorder" placeholder="Reorder level">
+          <input type="date" id="newExpiry" title="Expiry date (optional)">
+          <button id="saveProductBtn" class="btn btn-primary">Save</button>
+          <button id="cancelProductBtn" class="btn btn-ghost">Cancel</button>
+        </div>
+
+        <div class="table-wrap">
+          <table id="productsTable">
+            <thead>
+              <tr><th>SKU</th><th>Name</th><th>Cost</th><th>Price</th><th>Stock</th><th>Reorder</th><th>Expiry</th><th>Status</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ---------- SUPPLIERS TAB ---------- -->
+      <section id="tab-suppliers" class="tab-panel">
+        <header class="panel-header">
+          <h2>Suppliers &amp; Purchase Orders</h2>
+          <p class="muted">Manage suppliers and restock products.</p>
+        </header>
+
+        <div class="two-col">
+          <div>
+            <div class="toolbar">
+              <h3>Suppliers</h3>
+              <button id="addSupplierBtn" class="btn btn-primary">+ Add supplier</button>
+            </div>
+            <div id="addSupplierForm" class="inline-form" hidden>
+              <input type="text" id="supName" placeholder="Supplier name">
+              <input type="text" id="supContact" placeholder="Contact person">
+              <input type="text" id="supPhone" placeholder="Phone">
+              <button id="saveSupplierBtn" class="btn btn-primary">Save</button>
+              <button id="cancelSupplierBtn" class="btn btn-ghost">Cancel</button>
+            </div>
+            <div class="table-wrap">
+              <table id="suppliersTable">
+                <thead><tr><th>Name</th><th>Contact</th><th>Phone</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <div class="toolbar">
+              <h3>Purchase Orders</h3>
+              <button id="addPoBtn" class="btn btn-primary">+ Create PO</button>
+            </div>
+            <div id="addPoForm" class="inline-form" hidden>
+              <select id="poSupplier"></select>
+              <select id="poProduct"></select>
+              <input type="number" id="poQty" placeholder="Quantity ordered" min="1">
+              <input type="number" id="poCost" placeholder="Unit cost" step="0.01">
+              <button id="savePoBtn" class="btn btn-primary">Create</button>
+              <button id="cancelPoBtn" class="btn btn-ghost">Cancel</button>
+            </div>
+            <div class="table-wrap">
+              <table id="poTable">
+                <thead><tr><th>PO #</th><th>Supplier</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- REPORTS TAB ---------- -->
+      <section id="tab-reports" class="tab-panel">
+        <header class="panel-header">
+          <h2>Reports</h2>
+          <p class="muted">Sales performance, profit margin and product movement.</p>
+        </header>
+
+        <div class="toolbar">
+          <select id="periodSelect">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <button id="downloadXlsxBtn" class="btn btn-ghost">Download Excel</button>
+          <button id="downloadPdfBtn" class="btn btn-ghost">Download PDF</button>
+        </div>
+
+        <div class="report-grid">
+          <div class="report-card">
+            <h3>Sales over time</h3>
+            <div class="table-wrap"><table id="salesReportTable"><thead><tr><th>Period</th><th>Sales</th><th>Revenue</th></tr></thead><tbody></tbody></table></div>
+          </div>
+
+          <div class="report-card">
+            <h3>Best-selling products</h3>
+            <div id="bestSellingBars" class="bar-list"></div>
+          </div>
+
+          <div class="report-card">
+            <h3>Profit margin by product</h3>
+            <div class="table-wrap"><table id="profitTable"><thead><tr><th>Product</th><th>Units sold</th><th>Revenue</th><th>Profit</th></tr></thead><tbody></tbody></table></div>
+          </div>
+
+          <div class="report-card">
+            <h3>Slow-moving stock</h3>
+            <div class="table-wrap"><table id="slowTable"><thead><tr><th>Product</th><th>In stock</th><th>Sold recently</th></tr></thead><tbody></tbody></table></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ---------- SALE COMPLETE MODAL ---------- -->
+  <div id="receiptModal" class="modal-backdrop" hidden>
+    <div class="modal receipt-modal">
+      <h2>Sale complete</h2>
+      <p class="muted" id="modalSaleNumber"></p>
+      <div id="modalLines" class="receipt-lines"></div>
+      <div class="receipt-totals">
+        <div class="total-row"><span>Discount</span><span id="modalDiscount">0</span></div>
+        <div class="total-row total-row-main"><span>Total</span><span id="modalTotal">0</span></div>
+      </div>
+      <button id="newSaleBtn" class="btn btn-primary btn-block">Start new sale</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
